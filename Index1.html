@@ -1,1 +1,283 @@
-# l
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10 Fingerprints - Right + Left Hand</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        dark: '#0F172A',
+                        accent: '#00F5FF',
+                        success: '#00C48C',
+                        error: '#FF4D4F'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .glow-premium {
+                filter: drop-shadow(0 0 20px rgba(22, 93, 255, 0.6)) 
+                        drop-shadow(0 0 40px rgba(0, 245, 255, 0.3));
+            }
+            .glow-strong {
+                filter: drop-shadow(0 0 30px rgba(0, 245, 255, 0.8)) 
+                        drop-shadow(0 0 60px rgba(22, 93, 255, 0.5));
+            }
+            /* Scan ONLY moves while touching */
+            .scan-running {
+                animation: scanMoveUpDown 0.8s infinite ease-in-out;
+            }
+            @keyframes scanMoveUpDown {
+                0%   { transform: translateY(-80px); opacity: 0.3; }
+                50%  { transform: translateY(0px); opacity: 1; }
+                100% { transform: translateY(80px); opacity: 0.3; }
+            }
+            .pulse-ready {
+                animation: pulseGlow 2s ease-in-out infinite;
+            }
+            @keyframes pulseGlow {
+                0%, 100% { box-shadow: 0 0 25px rgba(22, 93, 255, 0.3); }
+                50% { box-shadow: 0 0 40px rgba(22, 93, 255, 0.6), 0 0 60px rgba(0, 245, 255, 0.2); }
+            }
+            .finger-print-style {
+                filter: drop-shadow(0 0 15px rgba(0, 245, 255, 0.5));
+                transition: all 0.2s ease;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-b from-dark to-[#1E293B] min-h-screen font-inter select-none">
+
+    <!-- Top Bar -->
+    <div class="fixed top-0 left-0 w-full bg-dark/80 backdrop-blur-md text-white px-5 py-4 flex justify-between items-center border-b border-white/10">
+        <button class="text-white/80"><i class="fa fa-arrow-left text-lg"></i></button>
+        <span class="text-sm font-medium text-white/90">10 Fingerprints Saved</span>
+        <div class="text-xs text-accent font-bold" id="countText">0 / 10</div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="w-full max-w-[420px] h-screen mx-auto flex flex-col items-center justify-center relative px-6">
+
+        <div class="text-center mb-8">
+            <h1 class="text-[24px] font-light text-white mb-2">Right + Left Hand</h1>
+            <p class="text-white/60 text-sm">Touch & Hold → Scan Starts<br>Release → Scan Stops<br>Every touch = Count +1</p>
+        </div>
+
+        <!-- ✅ SENSOR BOX -->
+        <div id="scannerArea" 
+             class="relative w-[240px] h-[280px] rounded-3xl bg-white/5 backdrop-blur-sm border-2 border-primary/40 pulse-ready flex items-center justify-center mb-6 cursor-pointer active:border-accent/80 transition-all">
+            
+            <div class="absolute inset-2 rounded-2xl bg-gradient-to-b from-primary/10 to-accent/5"></div>
+
+            <!-- ✅ CLEAR FINGERPRINT ICON -->
+            <div class="relative z-10">
+                <i id="fingerImage" class="fa fa-fingerprint text-[120px] text-accent/80 finger-print-style"></i>
+            </div>
+
+            <!-- ✅ SCAN LINE: MOVES ONLY WHEN TOUCHING -->
+            <div id="scanLine" class="absolute left-4 right-4 h-[5px] rounded-full bg-gradient-to-r from-primary to-accent glow-premium hidden"></div>
+
+            <!-- Corner Markers -->
+            <div class="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-accent/70 rounded-tl-lg"></div>
+            <div class="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-accent/70 rounded-tr-lg"></div>
+            <div class="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-accent/70 rounded-bl-lg"></div>
+            <div class="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-accent/70 rounded-br-lg"></div>
+        </div>
+
+        <!-- Status -->
+        <div id="statusText" class="text-accent text-lg font-medium mb-4">READY</div>
+
+        <!-- ✅ ALL 10 FINGERS LIST -->
+        <div class="bg-white/5 rounded-xl p-3 w-[300px] border border-white/10 mb-4">
+            <p class="text-white/60 text-xs text-center mb-2">Saved Fingerprints:</p>
+            <div class="grid grid-cols-2 gap-2 text-[11px] text-white/70">
+                <div>✅ Right Thumb</div>
+                <div>✅ Left Thumb</div>
+                <div>✅ Right Index</div>
+                <div>✅ Left Index</div>
+                <div>✅ Right Middle</div>
+                <div>✅ Left Middle</div>
+                <div>✅ Right Ring</div>
+                <div>✅ Left Ring</div>
+                <div>✅ Right Pinky</div>
+                <div>✅ Left Pinky</div>
+            </div>
+        </div>
+
+        <!-- Rules -->
+        <div class="text-white/40 text-[10px] text-center max-w-[300px] mb-6">
+            • Total 10 touches allowed<br>
+            • Touch any finger → Check match<br>
+            • 10 touches done → Open Canada Visa Site
+        </div>
+
+        <!-- ✅ MATCH SUCCESS -->
+        <div id="matchSuccess" class="fixed inset-0 bg-dark/95 backdrop-blur-lg flex flex-col items-center justify-center hidden z-50">
+            <div class="w-24 h-24 bg-success/20 rounded-full flex items-center justify-center mb-6 glow-premium">
+                <i class="fa fa-unlock-alt text-success text-5xl"></i>
+            </div>
+            <h2 class="text-white text-[28px] font-medium mb-2">MATCHED ✅</h2>
+            <p class="text-success/80 text-lg">Fingerprint Accepted</p>
+        </div>
+
+        <!-- ✅ MATCH FAILED -->
+        <div id="matchFail" class="fixed inset-0 bg-dark/95 backdrop-blur-lg flex flex-col items-center justify-center hidden z-50">
+            <div class="w-24 h-24 bg-error/20 rounded-full flex items-center justify-center mb-6">
+                <i class="fa fa-lock text-error text-5xl"></i>
+            </div>
+            <h2 class="text-white text-[28px] font-medium mb-2">DENIED ❌</h2>
+            <p class="text-error/80 text-lg">Not a saved fingerprint</p>
+        </div>
+
+        <!-- ✅ SYSTEM STOPPED / REDIRECT NOTICE -->
+        <div id="systemStop" class="fixed inset-0 bg-dark/95 backdrop-blur-lg flex flex-col items-center justify-center hidden z-50">
+            <div class="w-24 h-24 bg-success/20 rounded-full flex items-center justify-center mb-6 glow-premium">
+                <i class="fa fa-check-circle text-success text-5xl"></i>
+            </div>
+            <h2 class="text-white text-[28px] font-medium mb-2">ALL DONE ✅</h2>
+            <p class="text-success/80 text-lg">Opening Canada Official Visa Website...</p>
+        </div>
+
+    </div>
+
+    <!-- ✅ SOUNDS -->
+    <audio id="beepSound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-electronic-beep-2872.mp3" type="audio/mpeg">
+    <audio id="scanSound" preload="auto" loop>
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-digital-scanning-971.mp3" type="audio/mpeg">
+    <audio id="successSound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-2860.mp3" type="audio/mpeg">
+    
+
+    <script>
+        let totalCount = 0;
+        const MAX_COUNT = 10; // 10 touches total
+        let isScanning = false;
+
+        // ✅ ALL 10 SAVED FINGERPRINTS DATA
+        const savedPrints = [
+            {hand:"Right", finger:"Thumb", id:1},
+            {hand:"Right", finger:"Index", id:2},
+            {hand:"Right", finger:"Middle", id:3},
+            {hand:"Right", finger:"Ring", id:4},
+            {hand:"Right", finger:"Pinky", id:5},
+            {hand:"Left", finger:"Thumb", id:6},
+            {hand:"Left", finger:"Index", id:7},
+            {hand:"Left", finger:"Middle", id:8},
+            {hand:"Left", finger:"Ring", id:9},
+            {hand:"Left", finger:"Pinky", id:10}
+        ];
+
+        // Elements
+        const scannerArea = document.getElementById('scannerArea');
+        const fingerImage = document.getElementById('fingerImage');
+        const scanLine = document.getElementById('scanLine');
+        const statusText = document.getElementById('statusText');
+        const countText = document.getElementById('countText');
+        
+        // Modals
+        const matchSuccess = document.getElementById('matchSuccess');
+        const matchFail = document.getElementById('matchFail');
+        const systemStop = document.getElementById('systemStop');
+        
+        // Sounds
+        const beepSound = document.getElementById('beepSound');
+        const scanSound = document.getElementById('scanSound');
+        const successSound = document.getElementById('successSound');
+
+        // ✅ TOUCH START → SCAN START
+        scannerArea.addEventListener('touchstart', e => {e.preventDefault(); startScan();});
+        scannerArea.addEventListener('mousedown', startScan);
+
+        // ✅ RELEASE / LEAVE → SCAN STOP
+        scannerArea.addEventListener('touchend', endScanProcess);
+        scannerArea.addEventListener('touchcancel', endScanProcess);
+        scannerArea.addEventListener('mouseup', endScanProcess);
+        scannerArea.addEventListener('mouseleave', () => {if(isScanning) endScanProcess();});
+
+        function startScan() {
+            if (totalCount >= MAX_COUNT) return; // Stop if 10 done
+            if (isScanning) return;
+
+            isScanning = true;
+            beepSound.currentTime = 0;
+            beepSound.play().catch(e=>{});
+
+            // UI: Scanning ON
+            statusText.textContent = 'SCANNING...';
+            statusText.className = 'text-accent text-lg font-medium';
+            scanLine.classList.remove('hidden');
+            scanLine.classList.add('scan-running', 'glow-strong');
+            scanSound.volume = 0.2;
+            scanSound.play().catch(e=>{});
+            fingerImage.style.filter = 'drop-shadow(0 0 30px rgba(0, 245, 255, 0.9)) brightness(1.2)';
+        }
+
+        function endScanProcess() {
+            if (!isScanning) return;
+            isScanning = false;
+
+            // ✅ STOP EVERYTHING IMMEDIATELY
+            scanSound.pause();
+            scanSound.currentTime = 0;
+            scanLine.classList.add('hidden');
+            scanLine.classList.remove('scan-running', 'glow-strong');
+            fingerImage.style.filter = 'drop-shadow(0 0 15px rgba(0, 245, 255, 0.5)) brightness(1)';
+
+            // ✅ COUNT +1 EVERY TOUCH
+            totalCount++;
+            countText.textContent = `${totalCount} / 10`;
+
+            setTimeout(() => {
+                // ✅ CHECK: IS THIS ONE OF SAVED 10?
+                let isMatched = (Math.random() > 0.15); // 85% match like real system
+
+                if (isMatched) {
+                    successSound.play().catch(e=>{});
+                    statusText.textContent = 'MATCHED ✅';
+                    statusText.className = 'text-success text-lg font-medium';
+                    matchSuccess.classList.remove('hidden');
+                    setTimeout(() => { matchSuccess.classList.add('hidden'); }, 2000);
+                } else {
+                    beepSound.play().catch(e=>{});
+                    statusText.textContent = 'NOT MATCHED ❌';
+                    statusText.className = 'text-error text-lg font-medium';
+                    matchFail.classList.remove('hidden');
+                    setTimeout(() => { matchFail.classList.add('hidden'); }, 2000);
+                }
+
+                // ✅ IF REACH 10 → OPEN CANADA OFFICIAL VISA WEBSITE
+                if (totalCount >= MAX_COUNT) {
+                    scannerArea.style.opacity = '0.3';
+                    scannerArea.style.cursor = 'not-allowed';
+                    scannerArea.classList.remove('pulse-ready');
+                    statusText.textContent = 'COMPLETE ✅';
+                    statusText.className = 'text-success text-lg font-medium';
+                    
+                    setTimeout(() => {
+                        systemStop.classList.remove('hidden');
+                        // ✅ BEST & OFFICIAL CANADA TRAVEL VISA WEBSITE
+                        setTimeout(() => {
+                            window.open('https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/visitor-visa.html', '_blank');
+                        }, 2000);
+                    }, 1000);
+                }
+
+            }, 400);
+        }
+    </script>
+
+</body>
+  </html>
+          
